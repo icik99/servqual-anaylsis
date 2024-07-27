@@ -1,7 +1,8 @@
-import React, { useState } from 'react'
+import React, {  useState } from 'react'
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
-import Api from '@/utils/apiService';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
 const RadioGroup = ({ dimensionIndex, questionIndex, questionText, handleChange }) => {
     const options = [
@@ -34,6 +35,7 @@ const RadioGroup = ({ dimensionIndex, questionIndex, questionText, handleChange 
 
 export default function FormInputan() {
 
+    const router = useRouter()
     const [stepper, setStepper] = useState(1)
     const formik = useFormik({
         initialValues: {
@@ -80,17 +82,17 @@ export default function FormInputan() {
             ],
         },
         onSubmit: async (values) => {
+
             try {
                 await toast.promise (
-                    Api.post('survey', values), {
+                    axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/survey`, values), {
                         loading: 'Processing...',
                         success: (res) => {
-                            console.log(res)
-                            return res.response.data || 'Sukses Menghitung Nilai Servqual'
+                            router.push(`/form/hasil/${res.data.data.survey.id}`)
+                            return res.data?.data?.message || 'Sukses Menghitung Nilai Servqual'
                         },
                         error: (err) => {
-                            console.log(err)
-                            return err.response?.data || 'Something went wrong'
+                            return 'Pastikan anda mengisi semua pertanyaan!'
                         }
                     }
                 )
@@ -100,7 +102,7 @@ export default function FormInputan() {
         }
     })
 
-    console.log(formik.values)
+
     const handleExpectationChange = (dimensionIndex, questionIndex, value) => {
         const updatedSurveyResult = [...formik.values.surveyResult];
         updatedSurveyResult[dimensionIndex].answer.expectation[questionIndex] = value;
@@ -113,10 +115,10 @@ export default function FormInputan() {
     };
 
     return (
-        <div className='min-h-screen w-full py-10 px-20 bg-white'>
+        <div className='min-h-screen w-full py-10 md:px-20 px-6 bg-white'>
             {stepper === 1 ? (
-                <div>
-                    <h1 className='text-5xl mb-4 font-bold'>Identitas Responden</h1>
+                <div id='identitasResponden'>
+                    <h1  className='text-2xl md:text-5xl mb-4 font-bold'>Identitas Responden</h1>
                     <div className='space-y-4'>
                         <div className='w-full'>
                             <h1 className='mb-2'>Nama: </h1>
@@ -124,15 +126,28 @@ export default function FormInputan() {
                         </div>
                         <div className='w-full'>
                             <h1 className='mb-2'>Jenis Kelamin: </h1>
-                            <input type="text" name='jenisKelamin' placeholder='Jenis Kelamin....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                            <select type="text" name='jenisKelamin' placeholder='Jenis Kelamin....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' >
+                                <option value="">Pilih Jenis Kelamin...</option>
+                                <option value="MALE">Laki-Laki</option>
+                                <option value="FEMALE">Perempuan</option>
+                            </select>
                         </div>
                         <div className='w-full'>
                             <h1 className='mb-2'>Pendidikan: </h1>
-                            <input type="text" name='pendidikan' placeholder='Pendidikan....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                            <select type="text" name='pendidikan' placeholder='Pendidikan....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' >
+                                <option value="">Pilih Status Tingkat Pendidikan...</option>
+                                <option value="SD">SD</option>
+                                <option value="SMP">SMP</option>
+                                <option value="SMA">SMA</option>
+                                <option value="S1">Sarjana (S1)</option>
+                            </select>
                         </div>
                         <div className='w-full'>
                             <h1 className='mb-2'>Usia: </h1>
-                            <input type="text" name='usia' placeholder='Usia....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                            <div className='flex gap-2'>
+                                <input type="text" name='usia' placeholder='Usia....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                                <div className='py-2 px-5 border-2 shadow rounded-lg w-[100px] '>Tahun</div>
+                            </div>
                         </div>
                     </div>
                     <div className='mt-4 flex items-center justify-end'>
@@ -140,9 +155,9 @@ export default function FormInputan() {
                     </div>
                 </div>
             ) :  stepper === 2 ? (
-                <div>
-                    <h1 className='text-5xl mb-4 font-bold'>Harapan</h1>
-                    <div className='mb-4'>
+                <div id='harapan'>
+                    <h1  className='text-2xl md:text-5xl mb-4 font-bold'>Harapan</h1>
+                    <div className='mb-4 w-full'>
                         <h1 className='text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
@@ -171,71 +186,73 @@ export default function FormInputan() {
                             />
                         </div>
                     </div>
-                    <div className='mb-4'>
+                    <div className='mb-4 w-full'>
                         <h1 className='text-lg mb-4'>Dimensi Reliability (Keandalan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
-                            <RadioGroup
-                                dimensionIndex={1}
-                                questionIndex={0}
-                                questionText="1. Lembaga harus mampu melaksanakan layanan yang dijanjikan secara andal"
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={1}
-                                questionIndex={1}
-                                questionText="2. Lembaga harus menunjukkan kepedulian dalam menyelesaikan masalah pelanggan."
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={1}
-                                questionIndex={2}
-                                questionText="3. Lembaga harus memberikan layanan yang benar pada kali pertama. "
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={1}
-                                questionIndex={3}
-                                questionText="4. Lembaga harus memberikan layanan tepat waktu."
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={1}
-                                questionIndex={4}
-                                questionText="5. Lembaga harus menyimpan catatan yang akurat."
-                                handleChange={handleExpectationChange}
+                                <RadioGroup
+                                    dimensionIndex={1}
+                                    questionIndex={0}
+                                    questionText="1. Lembaga harus mampu melaksanakan layanan yang dijanjikan secara andal"
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={1}
+                                    questionIndex={1}
+                                    questionText="2. Lembaga harus menunjukkan kepedulian dalam menyelesaikan masalah pelanggan."
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={1}
+                                    questionIndex={2}
+                                    questionText="3. Lembaga harus memberikan layanan yang benar pada kali pertama. "
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={1}
+                                    questionIndex={3}
+                                    questionText="4. Lembaga harus memberikan layanan tepat waktu."
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={1}
+                                    questionIndex={4}
+                                    questionText="5. Lembaga harus menyimpan catatan yang akurat."
+                                    handleChange={handleExpectationChange}
                             />
                         </div>
                     </div>
-                    <div className='mb-4'>
+                    <div className='mb-4 w-full'>
                         <h1 className='text-lg mb-4'>Dimensi Responsiveness (Daya Tanggap)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
-                            <RadioGroup
-                                dimensionIndex={2}
-                                questionIndex={0}
-                                questionText="1. Karyawan harus memberi tahu pelanggan kapan layanan akan dilakukan."
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={2}
-                                questionIndex={1}
-                                questionText="2	. Karyawan harus memberikan layanan cepat kepada pelanggan. "
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={2}
-                                questionIndex={2}
-                                questionText="3. Karyawan harus selalu siap membantu pelanggan. "
-                                handleChange={handleExpectationChange}
-                            />
-                            <RadioGroup
-                                dimensionIndex={2}
-                                questionIndex={3}
-                                questionText="4. Karyawan tidak boleh terlalu sibuk untuk merespons permintaan pelanggan."
-                                handleChange={handleExpectationChange}
-                            />
+                                <RadioGroup
+                                    dimensionIndex={2}
+                                    questionIndex={0}
+                                    questionText="1. Karyawan harus memberi tahu pelanggan kapan layanan akan dilakukan."
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={2}
+                                    questionIndex={1}
+                                    questionText="2	. Karyawan harus memberikan layanan cepat kepada pelanggan. "
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={2}
+                                    questionIndex={2}
+                                    questionText="3. Karyawan harus selalu siap membantu pelanggan. "
+                                    handleChange={handleExpectationChange}
+                                />
+                                <RadioGroup
+                                    dimensionIndex={2}
+                                    questionIndex={3}
+                                    questionText="4. Karyawan tidak boleh terlalu sibuk untuk merespons permintaan pelanggan."
+                                    handleChange={handleExpectationChange}
+                                />
+                            </div>
+                            <div className='grid grid-cols-2 gap-4'>
                         </div>
                     </div>
-                    <div className='mb-4'>
+                    <div className='mb-4 w-full'>
                         <h1 className='text-lg mb-4'>Dimensi Assurance (Jaminan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
@@ -262,9 +279,11 @@ export default function FormInputan() {
                                 questionText="4. Karyawan harus memiliki pengetahuan untuk menjawab pertanyaan pelanggan."
                                 handleChange={handleExpectationChange}
                             />
+                            </div>
+                            <div className='grid grid-cols-2 gap-4'>
                         </div>
                     </div>
-                    <div className='mb-4'>
+                    <div className='mb-4 w-full'>
                         <h1 className='text-lg mb-4'>Dimensi Emphaty (Empati)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
@@ -295,12 +314,12 @@ export default function FormInputan() {
                     </div>
                     <div className='mt-4 flex items-center justify-end gap-4'>
                         <button onClick={() => setStepper(1)} className='py-2 px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</button>
-                        <button onClick={() => setStepper(3)} className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</button>
+                        <a onClick={() => {setStepper(3)}} href='#persepsi' className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</a>
                     </div>
                 </div>
             ) : (
-                <div>
-                    <h1 className='text-5xl mb-4 font-bold'>Persepsi</h1>
+                <div id='persepsi' >
+                    <h1 className='text-2xl md:text-5xl mb-4 font-bold'>Persepsi</h1>
                     <div className='mb-4'>
                         <h1 className='text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
@@ -453,7 +472,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mt-4 flex items-center justify-end gap-4'>
-                        <button onClick={() => setStepper(2)} className='py-2 px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</button>
+                        <a onClick={() => setStepper(2)} href='#harapan' className='py-2 px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</a>
                         <button onClick={formik.handleSubmit} className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Lihat Hasil</button>
                     </div>
                 </div>
