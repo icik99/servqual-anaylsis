@@ -3,6 +3,7 @@ import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import { useRouter } from 'next/router';
+import Api from '@/utils/apiService';
 
 const RadioGroup = ({ dimensionIndex, questionIndex, questionText, handleChange }) => {
     const options = [
@@ -17,9 +18,9 @@ const RadioGroup = ({ dimensionIndex, questionIndex, questionText, handleChange 
 
     return (
         <div className=''>
-            <h1>{questionText}</h1>
+            <h1 className='text-sm md:text-base'>{questionText}</h1>
             {options.map((option) => (
-                <div key={option.value} className='flex gap-2 pl-4'>
+                <div key={option.value} className='flex gap-2 pl-4 text-sm md:text-base'>
                     <input
                         type="radio"
                         name={`question${questionIndex}`}
@@ -85,14 +86,14 @@ export default function FormInputan() {
 
             try {
                 await toast.promise (
-                    axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/survey`, values), {
+                    Api.post(`/survey`, values), {
                         loading: 'Processing...',
                         success: (res) => {
                             router.push(`/form/hasil/${res.data.data.survey.id}`)
                             return res.data?.data?.message || 'Sukses Menghitung Nilai Servqual'
                         },
                         error: (err) => {
-                            return 'Pastikan anda mengisi semua pertanyaan!'
+                            return 'Something went wrong!'
                         }
                     }
                 )
@@ -122,11 +123,11 @@ export default function FormInputan() {
                     <div className='space-y-4'>
                         <div className='w-full'>
                             <h1 className='mb-2'>Nama: </h1>
-                            <input type="text" name='nama' placeholder='Nama....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                            <input type="text" name='nama' placeholder='Nama....' onChange={formik.handleChange} className='py-1 md:py-2 px-5 border-2 shadow rounded-md w-full' />
                         </div>
                         <div className='w-full'>
                             <h1 className='mb-2'>Jenis Kelamin: </h1>
-                            <select type="text" name='jenisKelamin' placeholder='Jenis Kelamin....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' >
+                            <select type="text" name='jenisKelamin' placeholder='Jenis Kelamin....' onChange={formik.handleChange} className='py-1 md:py-2 px-5 border-2 shadow rounded-md w-full' >
                                 <option value="">Pilih Jenis Kelamin...</option>
                                 <option value="MALE">Laki-Laki</option>
                                 <option value="FEMALE">Perempuan</option>
@@ -134,7 +135,7 @@ export default function FormInputan() {
                         </div>
                         <div className='w-full'>
                             <h1 className='mb-2'>Pendidikan: </h1>
-                            <select type="text" name='pendidikan' placeholder='Pendidikan....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' >
+                            <select type="text" name='pendidikan' placeholder='Pendidikan....' onChange={formik.handleChange} className='py-1 md:py-2 px-5 border-2 shadow rounded-md w-full' >
                                 <option value="">Pilih Status Tingkat Pendidikan...</option>
                                 <option value="SD">SD</option>
                                 <option value="SMP">SMP</option>
@@ -145,20 +146,20 @@ export default function FormInputan() {
                         <div className='w-full'>
                             <h1 className='mb-2'>Usia: </h1>
                             <div className='flex gap-2'>
-                                <input type="text" name='usia' placeholder='Usia....' onChange={formik.handleChange} className='py-2 px-5 border-2 shadow rounded-lg w-full' />
+                                <input type="text" name='usia' placeholder='Usia....' onChange={formik.handleChange} className='py-1 md:py-2 px-5 border-2 shadow rounded-md w-full' />
                                 <div className='py-2 px-5 border-2 shadow rounded-lg w-[100px] '>Tahun</div>
                             </div>
                         </div>
                     </div>
                     <div className='mt-4 flex items-center justify-end'>
-                        <button onClick={() => setStepper(2)} className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</button>
+                        <button onClick={() => setStepper(2)} className='py-2 px-3 text-sm md:text-base md:py-2 md:px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</button>
                     </div>
                 </div>
             ) :  stepper === 2 ? (
                 <div id='harapan'>
                     <h1  className='text-2xl md:text-5xl mb-4 font-bold'>Harapan</h1>
                     <div className='mb-4 w-full'>
-                        <h1 className='text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={0}
@@ -187,7 +188,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4 w-full'>
-                        <h1 className='text-lg mb-4'>Dimensi Reliability (Keandalan)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Reliability (Keandalan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                                 <RadioGroup
                                     dimensionIndex={1}
@@ -222,7 +223,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4 w-full'>
-                        <h1 className='text-lg mb-4'>Dimensi Responsiveness (Daya Tanggap)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Responsiveness (Daya Tanggap)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                                 <RadioGroup
                                     dimensionIndex={2}
@@ -253,7 +254,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4 w-full'>
-                        <h1 className='text-lg mb-4'>Dimensi Assurance (Jaminan)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Assurance (Jaminan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={3}
@@ -284,7 +285,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4 w-full'>
-                        <h1 className='text-lg mb-4'>Dimensi Emphaty (Empati)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Emphaty (Empati)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={4}
@@ -313,15 +314,15 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mt-4 flex items-center justify-end gap-4'>
-                        <button onClick={() => setStepper(1)} className='py-2 px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</button>
-                        <a onClick={() => {setStepper(3)}} href='#persepsi' className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</a>
+                        <button onClick={() => setStepper(1)} className='py-2 px-3 text-sm md:text-base md:py-2 md:px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</button>
+                        <a onClick={() => {setStepper(3)}} href='#persepsi' className='py-2 px-3 text-sm md:text-base md:py-2 md:px-5 bg-blue-500 text-white font-semibold rounded-lg'>Selanjutnya</a>
                     </div>
                 </div>
             ) : (
                 <div id='persepsi' >
                     <h1 className='text-2xl md:text-5xl mb-4 font-bold'>Persepsi</h1>
                     <div className='mb-4'>
-                        <h1 className='text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Tangible (Bukti Fisik)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={0}
@@ -350,7 +351,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4'>
-                        <h1 className='text-lg mb-4'>Dimensi Reliability (Keandalan)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Reliability (Keandalan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={1}
@@ -385,7 +386,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4'>
-                        <h1 className='text-lg mb-4'>Dimensi Responsiveness (Daya Tanggap)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Responsiveness (Daya Tanggap)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={2}
@@ -414,7 +415,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4'>
-                        <h1 className='text-lg mb-4'>Dimensi Assurance (Jaminan)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Assurance (Jaminan)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={3}
@@ -443,7 +444,7 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mb-4'>
-                        <h1 className='text-lg mb-4'>Dimensi Emphaty (Empati)</h1>
+                        <h1 className='text-sm md:text-lg mb-4'>Dimensi Emphaty (Empati)</h1>
                         <div className='rounded-lg border-2 shadow-lg p-5 space-y-4'>
                             <RadioGroup
                                 dimensionIndex={4}
@@ -472,8 +473,8 @@ export default function FormInputan() {
                         </div>
                     </div>
                     <div className='mt-4 flex items-center justify-end gap-4'>
-                        <a onClick={() => setStepper(2)} href='#harapan' className='py-2 px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</a>
-                        <button onClick={formik.handleSubmit} className='py-2 px-5 bg-blue-500 text-white font-semibold rounded-lg'>Lihat Hasil</button>
+                        <a onClick={() => setStepper(2)} href='#harapan' className='py-2 px-3 text-sm md:text-base md:py-2 md:px-5 text-blue-500 bg-white font-semibold border-2 border-blue-500 rounded-lg'>Kembali</a>
+                        <button onClick={formik.handleSubmit} className='py-2 px-3 text-sm md:text-base md:py-2 md:px-5 bg-blue-500 text-white font-semibold rounded-lg'>Lihat Hasil</button>
                     </div>
                 </div>
             )}

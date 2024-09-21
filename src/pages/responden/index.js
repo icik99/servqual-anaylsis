@@ -1,13 +1,28 @@
+import Api from '@/utils/apiService';
 import { Button } from 'antd';
 import { data } from 'autoprefixer';
 import moment from 'moment';
 import Link from 'next/link';
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
-export default function Responden({dataResponden}) {
-    console.log(dataResponden)
+export default function Responden() {
+  const [dataRes, setDataRes] = useState(null)
 
-    const dataRes = dataResponden.data
+  const getResponden = async () => {
+    try {
+      const res = await Api.get('/survey')
+      console.log(res)
+      setDataRes(res.data.data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getResponden()
+  }, [])
+
+
   return (
     <div className='min-h-screen w-full py-10 md:px-20 px-6 bg-white'>
         <div className="flex gap-10 justify-between mb-10">
@@ -29,7 +44,7 @@ export default function Responden({dataResponden}) {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.values(dataRes).map((item, idx) => (
+                  {dataRes && Object.values(dataRes).map((item, idx) => (
                     <tr key={idx}>
                       <td className="border border-gray-300 px-4 py-1">{idx + 1}</td>
                       <td className="border border-gray-300 px-4 py-1">{moment(item?.tanggal).format('DD MMMM YYYY - [Pukul] HH:mm')}</td>
@@ -55,15 +70,3 @@ export default function Responden({dataResponden}) {
     </div>
   )
 }
-
-export async function getServerSideProps() {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/survey`);
-    const dataResponden = await res.json();
-  
-    // Mengembalikan data sebagai props ke komponen
-    return {
-      props: {
-        dataResponden,
-      },
-    };
-  }
